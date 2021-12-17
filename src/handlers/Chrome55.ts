@@ -297,7 +297,9 @@ export class Chrome55 extends HandlerInterface
 		}
 
 		this._sendStream.addTrack(track);
-		this._pc.addStream(this._sendStream);
+		// Deprecated !!
+		// Reference: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
+		this._pc.addStream(this._sendStream); // addStream
 
 		let offer = await this._pc.createOffer();
 		let localSdpObject = sdpTransform.parse(offer.sdp);
