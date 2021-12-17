@@ -27,8 +27,7 @@ const logger = new Logger('Chrome55');
 
 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
 
-export class Chrome55 extends HandlerInterface
-{
+export class Chrome55 extends HandlerInterface {
 	// Handler direction.
 	private _direction?: 'send' | 'recv';
 	// Remote SDP handler.
@@ -66,56 +65,49 @@ export class Chrome55 extends HandlerInterface
 	/**
 	 * Creates a factory function.
 	 */
-	static createFactory(): HandlerFactory
-	{
+	static createFactory(): HandlerFactory {
 		return (): Chrome55 => new Chrome55();
 	}
 
-	constructor()
-	{
+	constructor() {
 		super();
 	}
 
-	get name(): string
-	{
+	get name(): string {
 		return 'Chrome55';
 	}
 
-	close(): void
-	{
+	close(): void {
 		logger.debug('close()');
 
 		// Close RTCPeerConnection.
-		if (this._pc)
-		{
+		if (this._pc) {
 			try { this._pc.close(); }
-			catch (error) {}
+			catch (error) { }
 		}
 	}
 
-	async getNativeRtpCapabilities(): Promise<RtpCapabilities>
-	{
+	async getNativeRtpCapabilities(): Promise<RtpCapabilities> {
 		logger.debug('getNativeRtpCapabilities()');
 
 		const pc = new (RTCPeerConnection as any)(
 			{
-				iceServers         : [],
-				iceTransportPolicy : 'all',
-				bundlePolicy       : 'max-bundle',
-				rtcpMuxPolicy      : 'require',
-				sdpSemantics       : 'plan-b'
+				iceServers: [],
+				iceTransportPolicy: 'all',
+				bundlePolicy: 'max-bundle',
+				rtcpMuxPolicy: 'require',
+				sdpSemantics: 'plan-b'
 			});
 
-		try
-		{
+		try {
 			const offer = await pc.createOffer(
 				{
-					offerToReceiveAudio : true,
-					offerToReceiveVideo : true
+					offerToReceiveAudio: true,
+					offerToReceiveVideo: true
 				});
 
 			try { pc.close(); }
-			catch (error) {}
+			catch (error) { }
 
 			const sdpObject = sdpTransform.parse(offer.sdp);
 			const nativeRtpCapabilities =
@@ -123,21 +115,19 @@ export class Chrome55 extends HandlerInterface
 
 			return nativeRtpCapabilities;
 		}
-		catch (error)
-		{
+		catch (error) {
 			try { pc.close(); }
-			catch (error2) {}
+			catch (error2) { }
 
 			throw error;
 		}
 	}
 
-	async getNativeSctpCapabilities(): Promise<SctpCapabilities>
-	{
+	async getNativeSctpCapabilities(): Promise<SctpCapabilities> {
 		logger.debug('getNativeSctpCapabilities()');
 
 		return {
-			numStreams : SCTP_NUM_STREAMS
+			numStreams: SCTP_NUM_STREAMS
 		};
 	}
 
@@ -154,8 +144,7 @@ export class Chrome55 extends HandlerInterface
 			proprietaryConstraints,
 			extendedRtpCapabilities
 		}: HandlerRunOptions
-	): void
-	{
+	): void {
 		logger.debug('run()');
 
 		this._direction = direction;
@@ -166,37 +155,35 @@ export class Chrome55 extends HandlerInterface
 				iceCandidates,
 				dtlsParameters,
 				sctpParameters,
-				planB : true
+				planB: true
 			});
 
 		this._sendingRtpParametersByKind =
 		{
-			audio : ortc.getSendingRtpParameters('audio', extendedRtpCapabilities),
-			video : ortc.getSendingRtpParameters('video', extendedRtpCapabilities)
+			audio: ortc.getSendingRtpParameters('audio', extendedRtpCapabilities),
+			video: ortc.getSendingRtpParameters('video', extendedRtpCapabilities)
 		};
 
 		this._sendingRemoteRtpParametersByKind =
 		{
-			audio : ortc.getSendingRemoteRtpParameters('audio', extendedRtpCapabilities),
-			video : ortc.getSendingRemoteRtpParameters('video', extendedRtpCapabilities)
+			audio: ortc.getSendingRemoteRtpParameters('audio', extendedRtpCapabilities),
+			video: ortc.getSendingRemoteRtpParameters('video', extendedRtpCapabilities)
 		};
 
 		this._pc = new (RTCPeerConnection as any)(
 			{
-				iceServers         : iceServers || [],
-				iceTransportPolicy : iceTransportPolicy || 'all',
-				bundlePolicy       : 'max-bundle',
-				rtcpMuxPolicy      : 'require',
-				sdpSemantics       : 'plan-b',
+				iceServers: iceServers || [],
+				iceTransportPolicy: iceTransportPolicy || 'all',
+				bundlePolicy: 'max-bundle',
+				rtcpMuxPolicy: 'require',
+				sdpSemantics: 'plan-b',
 				...additionalSettings
 			},
 			proprietaryConstraints);
 
 		// Handle RTCPeerConnection connection status.
-		this._pc.addEventListener('iceconnectionstatechange', () =>
-		{
-			switch (this._pc.iceConnectionState)
-			{
+		this._pc.addEventListener('iceconnectionstatechange', () => {
+			switch (this._pc.iceConnectionState) {
 				case 'checking':
 					this.emit('@connectionstatechange', 'connecting');
 					break;
@@ -217,8 +204,7 @@ export class Chrome55 extends HandlerInterface
 		});
 	}
 
-	async updateIceServers(iceServers: RTCIceServer[]): Promise<void>
-	{
+	async updateIceServers(iceServers: RTCIceServer[]): Promise<void> {
 		logger.debug('updateIceServers()');
 
 		const configuration = this._pc.getConfiguration();
@@ -228,8 +214,7 @@ export class Chrome55 extends HandlerInterface
 		this._pc.setConfiguration(configuration);
 	}
 
-	async restartIce(iceParameters: IceParameters): Promise<void>
-	{
+	async restartIce(iceParameters: IceParameters): Promise<void> {
 		logger.debug('restartIce()');
 
 		// Provide the remote SDP handler with new remote ICE parameters.
@@ -238,8 +223,7 @@ export class Chrome55 extends HandlerInterface
 		if (!this._transportReady)
 			return;
 
-		if (this._direction === 'send')
-		{
+		if (this._direction === 'send') {
 			const offer = await this._pc.createOffer({ iceRestart: true });
 
 			logger.debug(
@@ -256,8 +240,7 @@ export class Chrome55 extends HandlerInterface
 
 			await this._pc.setRemoteDescription(answer);
 		}
-		else
-		{
+		else {
 			const offer = { type: 'offer', sdp: this._remoteSdp!.getSdp() };
 
 			logger.debug(
@@ -276,30 +259,28 @@ export class Chrome55 extends HandlerInterface
 		}
 	}
 
-	async getTransportStats(): Promise<RTCStatsReport>
-	{
+	async getTransportStats(): Promise<RTCStatsReport> {
 		return this._pc.getStats();
 	}
 
 	async send(
 		{ track, encodings, codecOptions, codec }: HandlerSendOptions
-	): Promise<HandlerSendResult>
-	{
+	): Promise<HandlerSendResult> {
 		this._assertSendDirection();
 
 		logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
 
-		if (codec)
-		{
+		if (codec) {
 			logger.warn(
 				'send() | codec selection is not available in %s handler',
 				this.name);
 		}
 
 		this._sendStream.addTrack(track);
-		// TODO: Deprecated !!
+		// Deprecated !!
 		// Reference: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
-		this._pc.addStream(this._sendStream); // addStream
+		// this._pc.addStream(this._sendStream); // addStream
+		this._pc.addTrack(track,this._sendStream);
 
 		let offer = await this._pc.createOffer();
 		let localSdpObject = sdpTransform.parse(offer.sdp);
@@ -319,8 +300,7 @@ export class Chrome55 extends HandlerInterface
 		if (!this._transportReady)
 			await this._setupTransport({ localDtlsRole: 'server', localSdpObject });
 
-		if (track.kind === 'video' && encodings && encodings.length > 1)
-		{
+		if (track.kind === 'video' && encodings && encodings.length > 1) {
 			logger.debug('send() | enabling simulcast');
 
 			localSdpObject = sdpTransform.parse(offer.sdp);
@@ -331,7 +311,7 @@ export class Chrome55 extends HandlerInterface
 				{
 					offerMediaObject,
 					track,
-					numStreams : encodings.length
+					numStreams: encodings.length
 				});
 
 			offer = { type: 'offer', sdp: sdpTransform.write(localSdpObject) };
@@ -356,10 +336,8 @@ export class Chrome55 extends HandlerInterface
 			sdpPlanBUtils.getRtpEncodings({ offerMediaObject, track });
 
 		// Complete encodings with given values.
-		if (encodings)
-		{
-			for (let idx = 0; idx < sendingRtpParameters.encodings.length; ++idx)
-			{
+		if (encodings) {
+			for (let idx = 0; idx < sendingRtpParameters.encodings.length; ++idx) {
 				if (encodings[idx])
 					Object.assign(sendingRtpParameters.encodings[idx], encodings[idx]);
 			}
@@ -370,10 +348,8 @@ export class Chrome55 extends HandlerInterface
 		if (
 			sendingRtpParameters.encodings.length > 1 &&
 			sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/vp8'
-		)
-		{
-			for (const encoding of sendingRtpParameters.encodings)
-			{
+		) {
+			for (const encoding of sendingRtpParameters.encodings) {
 				encoding.scalabilityMode = 'S1T3';
 			}
 		}
@@ -381,8 +357,8 @@ export class Chrome55 extends HandlerInterface
 		this._remoteSdp!.send(
 			{
 				offerMediaObject,
-				offerRtpParameters  : sendingRtpParameters,
-				answerRtpParameters : sendingRemoteRtpParameters,
+				offerRtpParameters: sendingRtpParameters,
+				answerRtpParameters: sendingRemoteRtpParameters,
 				codecOptions
 			});
 
@@ -402,13 +378,12 @@ export class Chrome55 extends HandlerInterface
 		this._mapSendLocalIdTrack.set(localId, track);
 
 		return {
-			localId       : localId,
-			rtpParameters : sendingRtpParameters
+			localId: localId,
+			rtpParameters: sendingRtpParameters
 		};
 	}
 
-	async stopSending(localId: string): Promise<void>
-	{
+	async stopSending(localId: string): Promise<void> {
 		this._assertSendDirection();
 
 		logger.debug('stopSending() [localId:%s]', localId);
@@ -428,16 +403,13 @@ export class Chrome55 extends HandlerInterface
 			'stopSending() | calling pc.setLocalDescription() [offer:%o]',
 			offer);
 
-		try
-		{
+		try {
 			await this._pc.setLocalDescription(offer);
 		}
-		catch (error: any)
-		{
+		catch (error) {
 			// NOTE: If there are no sending tracks, setLocalDescription() will fail with
 			// "Failed to create channels". If so, ignore it.
-			if (this._sendStream.getTracks().length === 0)
-			{
+			if (this._sendStream.getTracks().length === 0) {
 				logger.warn(
 					'stopSending() | ignoring expected error due no sending tracks: %s',
 					error.toString());
@@ -463,26 +435,22 @@ export class Chrome55 extends HandlerInterface
 	async replaceTrack(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		localId: string, track: MediaStreamTrack | null
-	): Promise<void>
-	{
+	): Promise<void> {
 		throw new UnsupportedError('not implemented');
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async setMaxSpatialLayer(localId: string, spatialLayer: number): Promise<void>
-	{
+	async setMaxSpatialLayer(localId: string, spatialLayer: number): Promise<void> {
 		throw new UnsupportedError(' not implemented');
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async setRtpEncodingParameters(localId: string, params: any): Promise<void>
-	{
+	async setRtpEncodingParameters(localId: string, params: any): Promise<void> {
 		throw new UnsupportedError('not supported');
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async getSenderStats(localId: string): Promise<RTCStatsReport>
-	{
+	async getSenderStats(localId: string): Promise<RTCStatsReport> {
 		throw new UnsupportedError('not implemented');
 	}
 
@@ -494,17 +462,16 @@ export class Chrome55 extends HandlerInterface
 			label,
 			protocol
 		}: HandlerSendDataChannelOptions
-	): Promise<HandlerSendDataChannelResult>
-	{
+	): Promise<HandlerSendDataChannelResult> {
 		this._assertSendDirection();
 
 		const options =
 		{
-			negotiated        : true,
-			id                : this._nextSendSctpStreamId,
+			negotiated: true,
+			id: this._nextSendSctpStreamId,
 			ordered,
 			maxPacketLifeTime,
-			maxRetransmitTime : maxPacketLifeTime, // NOTE: Old spec.
+			maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
 			maxRetransmits,
 			protocol
 		};
@@ -519,8 +486,7 @@ export class Chrome55 extends HandlerInterface
 
 		// If this is the first DataChannel we need to create the SDP answer with
 		// m=application section.
-		if (!this._hasDataChannelMediaSection)
-		{
+		if (!this._hasDataChannelMediaSection) {
 			const offer = await this._pc.createOffer();
 			const localSdpObject = sdpTransform.parse(offer.sdp);
 			const offerMediaObject = localSdpObject.media
@@ -550,10 +516,10 @@ export class Chrome55 extends HandlerInterface
 
 		const sctpStreamParameters: SctpStreamParameters =
 		{
-			streamId          : options.id,
-			ordered           : options.ordered,
-			maxPacketLifeTime : options.maxPacketLifeTime,
-			maxRetransmits    : options.maxRetransmits
+			streamId: options.id,
+			ordered: options.ordered,
+			maxPacketLifeTime: options.maxPacketLifeTime,
+			maxRetransmits: options.maxRetransmits
 		};
 
 		return { dataChannel, sctpStreamParameters };
@@ -561,8 +527,7 @@ export class Chrome55 extends HandlerInterface
 
 	async receive(
 		{ trackId, kind, rtpParameters }: HandlerReceiveOptions
-	): Promise<HandlerReceiveResult>
-	{
+	): Promise<HandlerReceiveResult> {
 		this._assertRecvDirection();
 
 		logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
@@ -575,7 +540,7 @@ export class Chrome55 extends HandlerInterface
 			{
 				mid,
 				kind,
-				offerRtpParameters : rtpParameters,
+				offerRtpParameters: rtpParameters,
 				streamId,
 				trackId
 			});
@@ -597,7 +562,7 @@ export class Chrome55 extends HandlerInterface
 		// parameters in the offer.
 		sdpCommonUtils.applyCodecParameters(
 			{
-				offerRtpParameters : rtpParameters,
+				offerRtpParameters: rtpParameters,
 				answerMediaObject
 			});
 
@@ -625,8 +590,7 @@ export class Chrome55 extends HandlerInterface
 		return { localId, track };
 	}
 
-	async stopReceiving(localId: string): Promise<void>
-	{
+	async stopReceiving(localId: string): Promise<void> {
 		this._assertRecvDirection();
 
 		logger.debug('stopReceiving() [localId:%s]', localId);
@@ -655,31 +619,27 @@ export class Chrome55 extends HandlerInterface
 
 		await this._pc.setLocalDescription(answer);
 	}
-	
+
 	async pauseReceiving(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		localId: string): Promise<void>
-	{
+		localId: string): Promise<void> {
 		// Unimplemented.
 	}
 
 	async resumeReceiving(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		localId: string): Promise<void>
-	{
+		localId: string): Promise<void> {
 		// Unimplemented.
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async getReceiverStats(localId: string): Promise<RTCStatsReport>
-	{
+	async getReceiverStats(localId: string): Promise<RTCStatsReport> {
 		throw new UnsupportedError('not implemented');
 	}
 
 	async receiveDataChannel(
 		{ sctpStreamParameters, label, protocol }: HandlerReceiveDataChannelOptions
-	): Promise<HandlerReceiveDataChannelResult>
-	{
+	): Promise<HandlerReceiveDataChannelResult> {
 		this._assertRecvDirection();
 
 		const {
@@ -691,11 +651,11 @@ export class Chrome55 extends HandlerInterface
 
 		const options =
 		{
-			negotiated        : true,
-			id                : streamId,
+			negotiated: true,
+			id: streamId,
 			ordered,
 			maxPacketLifeTime,
-			maxRetransmitTime : maxPacketLifeTime, // NOTE: Old spec.
+			maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
 			maxRetransmits,
 			protocol
 		};
@@ -706,8 +666,7 @@ export class Chrome55 extends HandlerInterface
 
 		// If this is the first DataChannel we need to create the SDP offer with
 		// m=application section.
-		if (!this._hasDataChannelMediaSection)
-		{
+		if (!this._hasDataChannelMediaSection) {
 			this._remoteSdp!.receiveSctpAssociation({ oldDataChannelSpec: true });
 
 			const offer = { type: 'offer', sdp: this._remoteSdp!.getSdp() };
@@ -720,8 +679,7 @@ export class Chrome55 extends HandlerInterface
 
 			const answer = await this._pc.createAnswer();
 
-			if (!this._transportReady)
-			{
+			if (!this._transportReady) {
 				const localSdpObject = sdpTransform.parse(answer.sdp);
 
 				await this._setupTransport({ localDtlsRole: 'client', localSdpObject });
@@ -744,12 +702,11 @@ export class Chrome55 extends HandlerInterface
 			localDtlsRole,
 			localSdpObject
 		}:
-		{
-			localDtlsRole: DtlsRole;
-			localSdpObject?: any;
-		}
-	): Promise<void>
-	{
+			{
+				localDtlsRole: DtlsRole;
+				localSdpObject?: any;
+			}
+	): Promise<void> {
 		if (!localSdpObject)
 			localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
 
@@ -770,19 +727,15 @@ export class Chrome55 extends HandlerInterface
 		this._transportReady = true;
 	}
 
-	private _assertSendDirection(): void
-	{
-		if (this._direction !== 'send')
-		{
+	private _assertSendDirection(): void {
+		if (this._direction !== 'send') {
 			throw new Error(
 				'method can just be called for handlers with "send" direction');
 		}
 	}
 
-	private _assertRecvDirection(): void
-	{
-		if (this._direction !== 'recv')
-		{
+	private _assertRecvDirection(): void {
+		if (this._direction !== 'recv') {
 			throw new Error(
 				'method can just be called for handlers with "recv" direction');
 		}
