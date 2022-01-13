@@ -66,7 +66,7 @@ switch (task) {
 			// execute(`git tag -a ${version} -m '${version}'`);
 			// execute('git push origin v3 && git push origin --tags');
 			execute('git push origin v3');
-			execute('npm publish');
+			// execute('npm publish');
 
 			break;
 		}
