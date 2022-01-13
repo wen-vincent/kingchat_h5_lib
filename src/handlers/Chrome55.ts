@@ -27,7 +27,8 @@ const logger = new Logger('Chrome55');
 
 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
 
-export class Chrome55 extends HandlerInterface {
+export class Chrome55 extends HandlerInterface 
+{
 	// Handler direction.
 	private _direction?: 'send' | 'recv';
 	// Remote SDP handler.
@@ -65,29 +66,35 @@ export class Chrome55 extends HandlerInterface {
 	/**
 	 * Creates a factory function.
 	 */
-	static createFactory(): HandlerFactory {
+	static createFactory(): HandlerFactory 
+	{
 		return (): Chrome55 => new Chrome55();
 	}
 
-	constructor() {
+	constructor() 
+	{
 		super();
 	}
 
-	get name(): string {
+	get name(): string 
+	{
 		return 'Chrome55';
 	}
 
-	close(): void {
+	close(): void 
+	{
 		logger.debug('close()');
 
 		// Close RTCPeerConnection.
-		if (this._pc) {
+		if (this._pc) 
+		{
 			try { this._pc.close(); }
 			catch (error) { }
 		}
 	}
 
-	async getNativeRtpCapabilities(): Promise<RtpCapabilities> {
+	async getNativeRtpCapabilities(): Promise<RtpCapabilities> 
+	{
 		logger.debug('getNativeRtpCapabilities()');
 
 		const pc = new (RTCPeerConnection as any)(
@@ -123,7 +130,8 @@ export class Chrome55 extends HandlerInterface {
 		}
 	}
 
-	async getNativeSctpCapabilities(): Promise<SctpCapabilities> {
+	async getNativeSctpCapabilities(): Promise<SctpCapabilities> 
+	{
 		logger.debug('getNativeSctpCapabilities()');
 
 		return {

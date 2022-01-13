@@ -61,7 +61,7 @@ switch (task)
 	case 'release':
 	{
 		execute('npm run typescript:build');
-		execute('npm run lint');
+		// execute('npm run lint');
 		execute('npm run test');
 		execute(`git commit -am '${version}'`);
 		execute(`git tag -a ${version} -m '${version}'`);
