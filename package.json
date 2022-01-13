@@ -1,20 +1,14 @@
 {
-  "name": "mediasoup-client",
-  "version": "3.6.48",
+  "name": "kingchat_h5_lib",
+  "version": "3.0.1",
   "description": "mediasoup client side JavaScript library",
   "contributors": [
     "Iñaki Baz Castillo <ibc@aliax.net> (https://inakibaz.me)",
     "José Luis Millán <jmillan@aliax.net> (https://github.com/jmillan)"
   ],
-  "homepage": "https://mediasoup.org",
-  "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/versatica/mediasoup-client.git"
-  },
-  "funding": {
-    "type": "opencollective",
-    "url": "https://opencollective.com/mediasoup"
+    "url": "http://10.200.0.3/jwl/jsyfzx/kingchat_root/kingchat_h5_lib.git"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
