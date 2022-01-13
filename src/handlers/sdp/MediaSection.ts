@@ -487,7 +487,7 @@ export class OfferMediaSection extends MediaSection
 			this._mediaObject.connection = { ip: '127.0.0.1', version: 4 };
 
 			if (!sctpParameters)
-				this._mediaObject.protocol = 'RTP/SAVPF';
+				this._mediaObject.protocol = 'UDP/TLS/RTP/SAVPF';
 			else
 				this._mediaObject.protocol = 'UDP/DTLS/SCTP';
 
